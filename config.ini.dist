@@ -1,0 +1,10 @@
+[server]
+host =
+port =
+
+
+[auth]
+nick =
+name =
+
+[start]
