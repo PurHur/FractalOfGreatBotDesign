@@ -18,6 +18,11 @@ class IrcClient {
      */
     protected $maxMessageLength = 512;
 
+    /**
+     * @var array
+     */
+    protected $messageListener = array();
+
 
     /**
      * IrcClient constructor.
@@ -30,6 +35,8 @@ class IrcClient {
 
     protected function connect() {
         $this->socket = fsockopen($this->config['server']['host'], $this->config['server']['port']);
+        stream_set_blocking($this->socket, FALSE);
+
         if (!$this->socket) {
             throw new Exception('No connection');
         }
@@ -52,22 +59,26 @@ class IrcClient {
     }
 
     public function listen() {
-        $backgroundFunction = new Background(function() {
-            $error = null;
-            while(!$error) {
-                $data = fgets($this->socket, $this->maxMessageLength);
-                if ($data) {
-                    $this->printLine($data);
-
-                    $data = explode(' ',$data);
-                    if ($data[0] == 'PING') {
-                        $this->send('PONG '.$data['1']);
-                    }
-                }
+        $error = null;
+        while(!$error) {
+            $data = fgets($this->socket, $this->maxMessageLength);
+            if ($data) {
+                $this->printLine($data);
             }
+            foreach($this->messageListener as $listener) {
+                $result = $listener['instance']->$listener['callable']($this, $data);
+                if (is_string($result)) $this->printLine($result);
+            }
+        }
 
-            throw new Exception($error);
-        });
+        throw new Exception($error);
+    }
+
+    public function addListener($instance, $callable) {
+        $this->messageListener[] = array(
+            'instance' => $instance,
+            'callable' => $callable,
+        );
     }
 
     public function send($data) {
@@ -78,19 +89,4 @@ class IrcClient {
         fputs($this->socket, $data."\r\n");
     }
 
-}
-
-class Background extends Thread {
-
-    public function __construct(callable $call, array $args = []) {
-        $this->call = $call;
-        $this->args = $args;
-    }
-
-    public function run() {
-        call_user_func_array($this->call, $this->args);
-    }
-
-    protected $call;
-    protected $args;
 }
