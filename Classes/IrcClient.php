@@ -14,6 +14,11 @@ class IrcClient {
     protected $socket = null;
 
     /**
+     * @var boolean
+     */
+    protected $ircState = null;
+
+    /**
      * @var int
      */
     protected $maxMessageLength = 512;
@@ -82,9 +87,6 @@ class IrcClient {
     }
 
     public function send($data) {
-        //$chunks = chunk_split
-        //if (strlen($data) < 5210)
-
         $this->printLine($data."\r\n");
         fputs($this->socket, $data."\r\n");
     }
