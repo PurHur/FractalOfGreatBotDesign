@@ -55,12 +55,20 @@ class IrcClient {
         flush();
     }
 
+    public function getMaxMessageLength() {
+      return $this->maxMessageLength;
+    }
+
     /**
      * @param $authData
      */
     public function login($authData) {
-        $this->send('USER '.$authData['nick'].' purh.pw '.' '.$authData['nick'].' :'.$authData['name']);
-        $this->send('NICK '.$authData['nick']);
+        $this->send('USER '.$authData['nick'].' $'.$authData['host'].' '.' '.$authData['nick'].' :'.$authData['name']);
+        $this->changeNick($authData['nick']);
+    }
+
+    public function changeNick($nick) {
+      $this->send('NICK '.$nick);
     }
 
     public function listen() {

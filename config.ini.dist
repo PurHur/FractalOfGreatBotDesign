@@ -4,6 +4,7 @@ port =
 
 
 [auth]
+host = 
 nick =
 name =
 

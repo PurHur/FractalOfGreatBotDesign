@@ -23,7 +23,7 @@ class CLIInput {
     }
 
     public function run($ircClient, $data) {
-        $input = @fread($this->stdinHandler, 512);
+        $input = @fread($this->stdinHandler, $ircClient->getMaxMessageLength());
         if ($input) {
             $ircClient->send($input);
         }
