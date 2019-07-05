@@ -1,5 +1,7 @@
 <?php
 
+// this handler alone is sufficient enough to run a bot on an irc network
+
 class PingPongHandler {
 
     /**
